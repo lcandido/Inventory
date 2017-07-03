@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Estoque</string>
+    <string name="empty_view_title_text">Estoque vazio...</string>
+    <string name="hint_product_name">Nome</string>
+    <string name="hint_product_price">Preço</string>
+    <string name="hint_product_quantity">Quantidade</string>
+    <string name="in_stock">Estoque (%1$s)</string>
+    <string name="empty_view_subtitle_text">Comece adicionando um produto</string>
+    <string name="discard">Descartar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="category_name">Nome</string>
+    <string name="category_price">Preço</string>
+    <string name="category_quantity">Qtde</string>
+    <string name="delete">Excluir</string>
+    <string name="delete_dialog_msg">Excluir este produto?</string>
+    <string name="action_save">Salvar</string>
+    <string name="body_email">Detalhe da compra: Nome do produto: %1$s Quantidade: TBD</string>
+    <string name="action_delete">Excluir</string>
+    <string name="action_delete_all_entries">Excluir Todos Produtos</string>
+    <string name="action_insert_dummy_data">Inserir Dados de Teste</string>
+    <string name="editor_activity_title_edit_product">Editar Produto</string>
+    <string name="editor_activity_title_new_product">Adicionar Produto</string>
+    <string name="editor_delete_product_failed">Erro ao excluir produto</string>
+    <string name="editor_delete_product_successful">Produto excluído</string>
+    <string name="editor_insert_product_failed">Erro ao salvar produto</string>
+    <string name="editor_insert_product_successful">Produto salvo</string>
+    <string name="editor_update_product_failed">Erro ao atualizar produto</string>
+    <string name="editor_update_product_successful">Produto atualizado</string>
+    <string name="invalid_product_name_exception">Produto requer um nome</string>
+    <string name="invalid_product_price_exception">Produto requer um preço válido</string>
+    <string name="invalid_product_quantity_exception">Produto requer uma quantidade válida</string>
+    <string name="keep_editing">Continue Editando</string>
+    <string name="order_more">Comprar Mais</string>
+    <string name="out_of_stock">Sem estoque</string>
+    <string name="sale">Vender</string>
+    <string name="select_picture">Selecionar Foto</string>
+    <string name="subject_email">Comprar</string>
+    <string name="supplier_email">fornecedor@example.com</string>
+    <string name="take_picture">Tirar Foto</string>
+    <string name="unsaved_changes_dialog_msg">Descarte as mudanças e abandone a edição?</string>
+</resources>

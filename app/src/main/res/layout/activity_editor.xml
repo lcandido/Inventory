@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Layout for the editor -->
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".EditorActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="@dimen/activity_margin">
+
+        <!-- Name category -->
+        <LinearLayout
+            android:id="@+id/container_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <!-- Label -->
+            <TextView
+                android:text="@string/category_name"
+                style="@style/CategoryStyle"
+                android:layout_width="0dp"
+                android:layout_weight="1"/>
+
+            <!-- Name field -->
+            <EditText
+                android:id="@+id/edit_product_name"
+                android:hint="@string/hint_product_name"
+                android:inputType="textCapWords"
+                style="@style/EditorFieldStyle"
+                android:layout_width="0dp"
+                android:layout_marginLeft="4dp"
+                android:layout_weight="3"/>
+
+        </LinearLayout>
+
+        <!-- Quantity category -->
+        <LinearLayout
+            android:id="@+id/container_quantity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <!-- Label -->
+            <TextView
+                android:text="@string/category_quantity"
+                style="@style/CategoryStyle"
+                android:layout_width="0dp"
+                android:layout_weight="1"/>
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_weight="3"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="4dp">
+
+                <!-- Quantity field -->
+                <EditText
+                    android:id="@+id/edit_product_quantity"
+                    android:hint="@string/hint_product_quantity"
+                    android:inputType="number"
+                    style="@style/EditorFieldStyle"
+                    android:layout_width="0dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_toLeftOf="@+id/sub_container_quantity"
+                    android:layout_height="wrap_content" />
+
+                <LinearLayout
+                    android:id="@+id/sub_container_quantity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true">
+
+                    <!-- Increase button -->
+                    <Button
+                        android:id="@+id/increase_quantity"
+                        android:layout_width="32dp"
+                        android:layout_height="36dp"
+                        android:text="+"
+                        android:layout_alignParentRight="true"
+                        android:layout_toLeftOf="@+id/decrease_quantity"
+                        android:textAppearance="?android:textAppearanceSmall" />
+
+                    <!-- Decrease button -->
+                    <Button
+                        android:id="@+id/decrease_quantity"
+                        android:layout_width="32dp"
+                        android:layout_height="36dp"
+                        android:text="-"
+                        android:layout_alignParentRight="true"
+                        android:textAppearance="?android:textAppearanceSmall" />
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+        <!-- Price category -->
+        <LinearLayout
+            android:id="@+id/container_price"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <!-- Label -->
+            <TextView
+                android:text="@string/category_price"
+                style="@style/CategoryStyle"
+                android:layout_width="0dp"
+                android:layout_weight="1"/>
+
+            <!-- Price field -->
+            <EditText
+                android:id="@+id/edit_product_price"
+                android:hint="@string/hint_product_price"
+                android:inputType="numberDecimal"
+                style="@style/EditorFieldStyle"
+                android:layout_width="0dp"
+                android:layout_marginLeft="4dp"
+                android:layout_weight="3"/>
+
+        </LinearLayout>
+
+        <!-- Order more button -->
+        <Button
+            android:id="@+id/order_product"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:onClick="orderProduct"
+            android:text="@string/order_more"
+            android:layout_marginTop="20dp"/>
+
+        <!-- Image product container -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="20dp" >
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="4"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginRight="4dp">
+
+                <!-- Select an existing picture from gallery button -->
+                <Button
+                    android:id="@+id/select_picture"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:onClick="selectPicture"
+                    android:text="@string/select_picture"/>
+
+                <!-- Take a new picture from camera -->
+                <Button
+                    android:id="@+id/take_picture"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:onClick="takePicture"
+                    android:text="@string/take_picture" />
+
+            </LinearLayout>
+
+            <!-- Image picture view -->
+            <ImageView
+                android:id="@+id/image"
+                android:layout_width="0dp"
+                android:layout_weight="3"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="4dp"
+                android:scaleType="centerCrop"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>
