@@ -8,13 +8,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.NavUtils;
@@ -24,7 +23,6 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -41,16 +39,15 @@ import com.example.android.inventory.data.InventoryContract.ProductEntry;
 import com.example.android.inventory.util.BitmapUtility;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Allows user to create a new product or edit an existing one.
  */
 public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    public static final String LOG_TAG = EditorActivity.class.getSimpleName();
     private static final int PICK_IMAGE_REQUEST = 0;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int MY_PERMISSIONS_REQUEST = 2;
@@ -75,7 +72,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private Uri mCurrentProductUri;
 
     private Uri mImageUri = null;
-    private int mQuantity = 0;
     private boolean mProductHasChanged = false;
 
     private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
@@ -86,31 +82,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         }
     };
 
-    private View.OnClickListener mClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-
-            String quantityString = mQuantityEditText.getText().toString();
-
-            if (quantityString.isEmpty()) {
-                mQuantity = 0;
-            } else {
-                mQuantity = Integer.parseInt(quantityString);
-            }
-
-            if (view.getId() == R.id.increase_quantity) {
-                increaseQuantity();
-            } else if (view.getId() == R.id.decrease_quantity) {
-                decreaseQuantity();
-            }
-
-            mQuantityEditText.setText(String.valueOf(mQuantity));
-        }
-    };
-
     /***
      * Perform initialization of layout, variables and loader.
-     * @param savedInstanceState
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,8 +95,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mNameEditText = (EditText) findViewById(R.id.edit_product_name);
         mQuantityEditText = (EditText) findViewById(R.id.edit_product_quantity);
         mPriceEditText = (EditText) findViewById(R.id.edit_product_price);
-        Button increaseQtyButton = (Button) findViewById(R.id.increase_quantity);
-        Button decreaseQtyButton = (Button) findViewById(R.id.decrease_quantity);
         mImageView = (ImageView) findViewById(R.id.image);
         mButtonTakePicture = (Button) findViewById(R.id.take_picture);
 
@@ -144,20 +115,17 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         requestPermissions();
 
-        // Register a callback to be invoked when increase and decrease quantity buttons are
-        // clicked
-        increaseQtyButton.setOnClickListener(mClickListener);
-        decreaseQtyButton.setOnClickListener(mClickListener);
-
         // Register a callback to be invoked when a touch event is dispatched to the input views
         mNameEditText.setOnTouchListener(mTouchListener);
         mQuantityEditText.setOnTouchListener(mTouchListener);
         mPriceEditText.setOnTouchListener(mTouchListener);
 
-        // Get the intent that started this activity
+        // Get the URI from the intent that started this activity
         Intent intent = getIntent();
         Uri currentProductUri = intent.getData();
 
+        // If URI is null so the user has clicked on Add Product FAB
+        // Else, user has clicked on specific product of the list
         if (currentProductUri == null) {
             // Set the activity title to add a product and invalidate the Delete option menu.
             setTitle(getString(R.string.editor_activity_title_new_product));
@@ -172,31 +140,40 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         if (savedInstanceState != null) {
             mImageUri = savedInstanceState.getParcelable("ImageUri");
-            mQuantity = savedInstanceState.getInt("Quantity");
             mProductHasChanged = savedInstanceState.getBoolean("ProductHasChanged");
         }
     }
 
+    /***
+     * Request permissions to camera, read and write external storage
+     */
     public void requestPermissions() {
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        String[] permissions = new String[] {
+                Manifest.permission.CAMERA,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE };
 
-            ActivityCompat.requestPermissions(this,
-                    new String[]{ Manifest.permission.CAMERA,
-                            Manifest.permission.READ_EXTERNAL_STORAGE,
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    MY_PERMISSIONS_REQUEST);
+        if (ContextCompat.checkSelfPermission(this, permissions[0]) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, permissions[1]) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, permissions[2]) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this, permissions, MY_PERMISSIONS_REQUEST);
 
         } else {
+
             mButtonTakePicture.setEnabled(true);
         }
     }
 
+    /***
+     * Callback for the result from requesting permissions.
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+                                           @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+
         if (requestCode == MY_PERMISSIONS_REQUEST) {
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED
@@ -204,22 +181,23 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                     && grantResults[2] == PackageManager.PERMISSION_GRANTED) {
                 mButtonTakePicture.setEnabled(true);
             } else {
-                Toast.makeText(getApplicationContext(), "Permission Denied", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Permission Denied",
+                        Toast.LENGTH_SHORT).show();
             }
         }
     }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
-
         super.onSaveInstanceState(savedInstanceState);
 
         savedInstanceState.putParcelable("ImageUri", mImageUri);
-        savedInstanceState.putInt("Quantity", mQuantity);
         savedInstanceState.putBoolean("ProductHasChanged", mProductHasChanged);
-
     }
 
+    /***
+     * Instantiate and return a loader for the product editor loader ID.
+     */
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
@@ -238,6 +216,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 null);
     }
 
+    /***
+     * Called when the product loader has finished its load
+     */
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
 
@@ -256,8 +237,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 String image = cursor.getString(imageColumnIndex);
 
                 mNameEditText.setText(name);
-                mQuantityEditText.setText(Integer.toString(quantity));
-                mPriceEditText.setText(String.format("%.2f", price));
+                mQuantityEditText.setText(String.format(Locale.getDefault(), "%d", quantity));
+                mPriceEditText.setText(String.format(Locale.getDefault(), "%.2f", price));
 
                 if (!image.isEmpty()) {
                     mImageUri = Uri.parse(image);
@@ -272,21 +253,57 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     }
 
-    public void increaseQuantity() {
-        mQuantity++;
-        mProductHasChanged = true;
-    }
-
-    public void decreaseQuantity() {
-        if (mQuantity > 0) {
-            mQuantity = mQuantity - 1;
-            mProductHasChanged = true;
+    public void hideSoftKeyboard() {
+        if (getCurrentFocus() != null) {
+            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
         }
     }
 
+    /***
+     * Called when the product loader is being reset, and thus making its data unavailable.
+     */
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mNameEditText.setText("");
+        mQuantityEditText.setText("");
+        mPriceEditText.setText("");
+    }
+
+    /***
+     * Called when user click on Increase (+) or Decrease (-) buttons to modify the product
+     * quantity
+     */
+    public void modifyQuantity(View view) {
+
+        String quantityString = mQuantityEditText.getText().toString().trim();
+        int quantity = 0;
+
+        if (!quantityString.isEmpty()) {
+            quantity = Integer.parseInt(quantityString);
+        }
+
+        if (view.getId() == R.id.increase_quantity) {
+            quantity++;
+            mProductHasChanged = true;
+        } else {
+            if (quantity > 0) {
+                quantity--;
+                mProductHasChanged = true;
+            }
+        }
+
+        mQuantityEditText.setText(String.valueOf(quantity));
+    }
+
+    /***
+     * Order more from the current product
+     */
     public void orderProduct(View view) {
+
         String nameProduct = mNameEditText.getText().toString();
 
+        // Call an intent to the Mail app
         Intent intent = new Intent(Intent.ACTION_SENDTO);
         intent.setData(Uri.parse("mailto:"));
         String[] address = new String[] {getString(R.string.supplier_email)};
@@ -298,6 +315,16 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         }
     }
 
+    /***
+     * Delete the product
+     */
+    public void delete(View view) {
+        showDeleteConfirmationDialog();
+    }
+
+    /***
+     * Select picture from gallery setting to the current product
+     */
     public void selectPicture(View view) {
         Intent intent;
 
@@ -312,6 +339,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
     }
 
+    /***
+     * Take a new picture from camera setting to the current product
+     */
     public void takePicture(View view) {
 
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -325,7 +355,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         }
     }
 
-    private File getOutputMediaFile(){
+    private File getOutputMediaFile() {
+
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DCIM), "Camera");
 
@@ -335,10 +366,13 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             }
         }
 
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmssSSS").format(new Date());
+        String timeStamp = new SimpleDateFormat(
+                "yyyyMMdd_HHmmssSSS", Locale.getDefault()).format(new Date());
+
         return new File(mediaStorageDir.getPath() + File.separator +
                 JPEG_FILE_PREFIX + timeStamp + JPEG_FILE_SUFFIX);
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
 
@@ -362,8 +396,12 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         }
     }
 
+    /***
+     * Save the product in the database
+     */
     private void saveProduct() {
 
+        // If user is adding a new product or updating a existing one
         if (mProductHasChanged || mCurrentProductUri == null) {
 
             String name = mNameEditText.getText().toString().trim();
@@ -521,20 +559,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         // Show dialog that there are unsaved changes
         showUnsavedChangesDialog(discardButtonClickListener);
-    }
-
-    public void hideSoftKeyboard() {
-        if(getCurrentFocus()!=null) {
-            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-            inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        mNameEditText.setText("");
-        mQuantityEditText.setText("");
-        mPriceEditText.setText("");
     }
 
     /**

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Estoque</string>
-    <string name="empty_view_title_text">Estoque vazio...</string>
+    <string name="empty_view_title_text">Estoque vazio&#8230;</string>
     <string name="hint_product_name">Nome</string>
     <string name="hint_product_price">Preço</string>
     <string name="hint_product_quantity">Quantidade</string>
@@ -33,10 +33,11 @@
     <string name="keep_editing">Continue Editando</string>
     <string name="order_more">Comprar Mais</string>
     <string name="out_of_stock">Sem estoque</string>
-    <string name="sale">Vender</string>
+    <string name="sale">Venda</string>
     <string name="select_picture">Selecionar Foto</string>
     <string name="subject_email">Comprar</string>
     <string name="supplier_email">fornecedor@example.com</string>
     <string name="take_picture">Tirar Foto</string>
     <string name="unsaved_changes_dialog_msg">Descarte as mudanças e abandone a edição?</string>
+    <string name="product_image">Imagem do produto</string>
 </resources>

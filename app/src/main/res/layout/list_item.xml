@@ -13,18 +13,22 @@
         android:id="@+id/image"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:scaleType="fitXY" />
+        android:scaleType="fitXY"
+        android:contentDescription="@string/product_image"/>
 
     <LinearLayout
         android:layout_width="0dp"
-        android:layout_weight="3"
+        android:layout_weight="5"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingLeft="16dp">
+        android:paddingLeft="16dp"
+        android:paddingStart="16dp"
+        android:paddingRight="0dp"
+        android:paddingEnd="0dp">
 
         <TextView
             android:id="@+id/name"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:textAppearanceMedium"
             android:textColor="@color/primary_text"
@@ -48,7 +52,8 @@
                 android:textAppearance="?android:textAppearanceSmall"
                 android:textColor="@color/secondary_text"
                 tools:text="In Stock (40)"
-                android:layout_toRightOf="@+id/price"/>
+                android:layout_toRightOf="@+id/price"
+                android:layout_toEndOf="@+id/price" />
         </RelativeLayout>
 
     </LinearLayout>
@@ -56,7 +61,7 @@
     <Button
         android:id="@+id/sale"
         android:layout_width="0dp"
-        android:layout_weight="1"
+        android:layout_weight="2"
         android:layout_height="40dp"
         android:text="@string/sale"/>
 

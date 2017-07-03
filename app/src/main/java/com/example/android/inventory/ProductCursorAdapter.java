@@ -3,10 +3,9 @@ package com.example.android.inventory;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.util.Log;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,18 +13,19 @@ import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.inventory.data.InventoryContract.ProductEntry;
 import com.example.android.inventory.util.BitmapUtility;
+
+import java.util.Locale;
 
 /**
  * {@link ProductCursorAdapter} is an adapter for a list or grid view
  * that uses a {@link Cursor} of product data as its data source. This adapter knows
  * how to create list items for each row of product data in the {@link Cursor}.
  */
-public class ProductCursorAdapter extends CursorAdapter {
-
-    public static final String LOG_TAG = EditorActivity.class.getSimpleName();
+class ProductCursorAdapter extends CursorAdapter {
 
     /**
      * Constructs a new {@link ProductCursorAdapter}.
@@ -33,7 +33,7 @@ public class ProductCursorAdapter extends CursorAdapter {
      * @param context The context
      * @param c       The cursor from which to get the data.
      */
-    public ProductCursorAdapter(Context context, Cursor c) {
+    ProductCursorAdapter(Context context, Cursor c) {
         super(context, c, 0 /* flags */);
     }
 
@@ -84,18 +84,17 @@ public class ProductCursorAdapter extends CursorAdapter {
         final int itemQuantity = cursor.getInt(quantityColumnIndex);
         float itemPrice = cursor.getFloat(priceColumnIndex);
         String productImage = cursor.getString(imageColumnIndex);
-        Log.v(LOG_TAG, "bindView: " + (productImage==null?"null":productImage));
 
-        String productQuantity = "";
+        String productQuantity;
         if (itemQuantity > 0) {
             productQuantity = context.getString(R.string.in_stock, Integer.toString(itemQuantity));
         } else {
             productQuantity = context.getString(R.string.out_of_stock);
         }
 
-        String productPrice = "$" + String.format("%.2f", itemPrice) + " \u2014 ";
+        String productPrice = "$" + String.format(Locale.getDefault(), "%.2f", itemPrice) + " \u2014 ";
 
-        if (!productImage.isEmpty()) {
+        if (!TextUtils.isEmpty(productImage)) {
             Uri uri = Uri.parse(productImage);
             imageView.setImageBitmap(
                     BitmapUtility.getCircleBitmap(
@@ -128,6 +127,13 @@ public class ProductCursorAdapter extends CursorAdapter {
                     values.put(ProductEntry.COLUMN_PRODUCT_QUANTITY, quantity);
 
                     int rowsUpdated = context1.getContentResolver().update(uri, values, null, null);
+
+                    if (rowsUpdated == 0){
+                        Toast.makeText(context1, R.string.editor_update_product_failed, Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(context1, R.string.editor_update_product_successful, Toast.LENGTH_SHORT).show();
+                    }
+
                 }
             }
         });

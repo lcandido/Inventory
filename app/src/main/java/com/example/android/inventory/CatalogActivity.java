@@ -1,7 +1,6 @@
 package com.example.android.inventory;
 
 import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -11,9 +10,6 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -32,9 +28,6 @@ public class CatalogActivity extends AppCompatActivity
 
     // Local variable for product cursor adapter
     ProductCursorAdapter mCursorAdapter;
-
-    // Log tag for this class
-    public static final String LOG_TAG = CatalogActivity.class.getSimpleName();
 
     /***
      * Perform initialization of layout, variables and loader.
@@ -84,7 +77,7 @@ public class CatalogActivity extends AppCompatActivity
    }
 
     /***
-     * Instantiate and return a new loader for the product loader ID.
+     * Instantiate and return a loader for the product loader ID.
      */
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -122,66 +115,6 @@ public class CatalogActivity extends AppCompatActivity
     public void onLoaderReset(Loader<Cursor> loader) {
         // Callback called when the data needs to be deleted.
         mCursorAdapter.swapCursor(null);
-    }
-
-    /***
-     * Insert a dummy product to the database
-     */
-    private void insertProduct() {
-
-        // Create a new map of values, where column names are the keys
-        ContentValues values = new ContentValues();
-        values.put(ProductEntry.COLUMN_PRODUCT_NAME, "Nexus");
-        values.put(ProductEntry.COLUMN_PRODUCT_QUANTITY, 50);
-        values.put(ProductEntry.COLUMN_PRODUCT_PRICE, 700);
-        values.put(ProductEntry.COLUMN_PRODUCT_IMAGE, "");
-
-        Uri uri = getContentResolver().insert(ProductEntry.CONTENT_URI, values);
-
-        long newRowId = ContentUris.parseId(uri);
-
-        Log.v(LOG_TAG, "New row ID " + newRowId);
-    }
-
-    /***
-     * Delete all products of the database
-     */
-    private void deleteAllProducts() {
-
-        int rows = getContentResolver().delete(InventoryContract.ProductEntry.CONTENT_URI, null, null);
-
-        Log.v(LOG_TAG, rows + " deleted.");
-    }
-
-    /***
-     * Initialize the contents of the Activity's standard options menu.
-     */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu options from the res/menu/menu_catalog.xml file.
-        // This adds menu items to the app bar.
-        getMenuInflater().inflate(R.menu.menu_catalog, menu);
-        return true;
-    }
-
-    /***
-     * Called whenever an item in your options menu is selected.
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // User clicked on a menu option in the app bar overflow menu
-        switch (item.getItemId()) {
-            // Respond to a click on the "Insert dummy data" menu option
-            case R.id.action_insert_dummy_data:
-                insertProduct();
-                return true;
-            // Respond to a click on the "Delete all entries" menu option
-            case R.id.action_delete_all_entries:
-                deleteAllProducts();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
     }
 
 }

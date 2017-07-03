@@ -10,7 +10,7 @@
     <string name="action_delete_all_entries">Delete All Products</string>
 
     <!-- Title text for the empty view, which describes the empty inventory image [CHAR LIMIT=50] -->
-    <string name="empty_view_title_text">Inventory is empty...</string>
+    <string name="empty_view_title_text">Inventory is empty&#8230;</string>
 
     <!-- Subtitle text for the empty view that prompts the user to add a product [CHAR LIMIT=50] -->
     <string name="empty_view_subtitle_text">Get started by adding a product</string>
@@ -116,5 +116,6 @@
 
     <!-- Label for Take Picture button [CHAR LIMIT=30] -->
     <string name="take_picture">Take Picture</string>
+    <string name="product_image">Product image</string>
 
 </resources>
