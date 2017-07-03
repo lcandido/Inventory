@@ -187,6 +187,10 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         }
     }
 
+    /***
+     * Called to retrieve state from an activity before being killed so that the state can be
+     * restored
+     */
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
@@ -253,6 +257,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     }
 
+    /***
+     * Hide soft keyboard when activity starts
+     */
     public void hideSoftKeyboard() {
         if (getCurrentFocus() != null) {
             InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
@@ -355,6 +362,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         }
     }
 
+    /***
+     * Get an output media file to take picture from camera.
+     */
     private File getOutputMediaFile() {
 
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
@@ -469,13 +479,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 }
             } else {
 
-                int rowsUpdated = getContentResolver().update(mCurrentProductUri, values, null, null);
+                getContentResolver().update(mCurrentProductUri, values, null, null);
 
-                if (rowsUpdated == 0){
-                    Toast.makeText(this, R.string.editor_update_product_failed, Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, R.string.editor_update_product_successful, Toast.LENGTH_SHORT).show();
-                }
             }
         }
 
