@@ -501,7 +501,7 @@ public class EditorActivity extends AppCompatActivity
                 // Update the existing row
                 int rowsUpdated = getContentResolver().update(mCurrentProductUri, values, null, null);
 
-                if (rowsUpdated == 0){
+                if (rowsUpdated == 0) {
                     Toast.makeText(this, R.string.editor_update_product_failed, Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(this, R.string.editor_update_product_successful, Toast.LENGTH_SHORT).show();
