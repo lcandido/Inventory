@@ -383,25 +383,29 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 JPEG_FILE_PREFIX + timeStamp + JPEG_FILE_SUFFIX);
     }
 
+    /***
+     * Called when Select Picture from Gallery or Take Picture from Camera activity exits,
+     * giving the requestCode you started it with, the resultCode it returned, and additional data
+     * from it.
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
 
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK) {
-            if (resultData != null) {
+        if (resultCode == Activity.RESULT_OK) {
+            // If request code is Select Picture and result code is success
+            if (requestCode == PICK_IMAGE_REQUEST && resultData == null) {
+                // Set product image with the given data from intent
                 mImageUri = resultData.getData();
                 mImageView.setImageBitmap(
                         BitmapUtility.getBitmapFromUri(this, mImageUri,
                                 mImageView.getWidth(), mImageView.getHeight()));
-                mImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-
-                mProductHasChanged = true;
+            // If request code is Take Picture and result code is success
+            } else if (requestCode == REQUEST_IMAGE_CAPTURE) {
+                // Set product image with the output media file
+                mImageView.setImageBitmap(
+                        BitmapUtility.getBitmapFromUri(this, mImageUri,
+                                mImageView.getWidth(), mImageView.getHeight()));
             }
-        } else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
-            mImageView.setImageBitmap(
-                    BitmapUtility.getBitmapFromUri(this, mImageUri,
-                            mImageView.getWidth(), mImageView.getHeight()));
-            mImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-
             mProductHasChanged = true;
         }
     }
