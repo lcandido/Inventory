@@ -84,16 +84,15 @@ class ProductCursorAdapter extends CursorAdapter {
         final int itemQuantity = cursor.getInt(quantityColumnIndex);
         float itemPrice = cursor.getFloat(priceColumnIndex);
         String productImage = cursor.getString(imageColumnIndex);
-
         String productQuantity;
         if (itemQuantity > 0) {
             productQuantity = context.getString(R.string.in_stock, Integer.toString(itemQuantity));
         } else {
             productQuantity = context.getString(R.string.out_of_stock);
         }
-
         String productPrice = "$" + String.format(Locale.getDefault(), "%.2f", itemPrice) + " \u2014 ";
 
+        // Update the ImageView with the product image attribute for the current product
         if (!TextUtils.isEmpty(productImage)) {
             Uri uri = Uri.parse(productImage);
             imageView.setImageBitmap(
@@ -110,9 +109,11 @@ class ProductCursorAdapter extends CursorAdapter {
         final Context context1 = context;
         final Uri uri = ContentUris.withAppendedId(ProductEntry.CONTENT_URI, productId);
 
+        // Register the callback for Sale button's click action
         saleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 int quantity = itemQuantity;
                 if (quantity > 0) {
                     quantity --;
@@ -126,13 +127,7 @@ class ProductCursorAdapter extends CursorAdapter {
                     ContentValues values = new ContentValues();
                     values.put(ProductEntry.COLUMN_PRODUCT_QUANTITY, quantity);
 
-                    int rowsUpdated = context1.getContentResolver().update(uri, values, null, null);
-
-                    if (rowsUpdated == 0){
-                        Toast.makeText(context1, R.string.editor_update_product_failed, Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(context1, R.string.editor_update_product_successful, Toast.LENGTH_SHORT).show();
-                    }
+                    context1.getContentResolver().update(uri, values, null, null);
 
                 }
             }

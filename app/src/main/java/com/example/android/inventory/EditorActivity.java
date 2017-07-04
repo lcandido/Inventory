@@ -46,7 +46,8 @@ import java.util.Locale;
 /**
  * Allows user to create a new product or edit an existing one.
  */
-public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class EditorActivity extends AppCompatActivity
+        implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int PICK_IMAGE_REQUEST = 0;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -124,7 +125,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         Intent intent = getIntent();
         Uri currentProductUri = intent.getData();
 
-        // If URI is null so the user has clicked on Add Product FAB
+        // If URI is null so user has clicked on Add Product FAB
         // Else, user has clicked on specific product of the list
         if (currentProductUri == null) {
             // Set the activity title to add a product and invalidate the Delete option menu.
@@ -132,7 +133,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             invalidateOptionsMenu();
         } else {
             // Set the activity title to edit product and initialize the loader to get data for
-            // the selected product in the {@link CatalogActivity}
+            // the selected product in the Catalog activity
             setTitle(getString(R.string.editor_activity_title_edit_product));
             mCurrentProductUri = currentProductUri;
             getSupportLoaderManager().initLoader(EDIT_LOADER, null, this);
@@ -154,9 +155,12 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE };
 
-        if (ContextCompat.checkSelfPermission(this, permissions[0]) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(this, permissions[1]) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(this, permissions[2]) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this,
+                    permissions[0]) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this,
+                    permissions[1]) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this,
+                    permissions[2]) != PackageManager.PERMISSION_GRANTED) {
 
             ActivityCompat.requestPermissions(this, permissions, MY_PERMISSIONS_REQUEST);
 
@@ -230,16 +234,19 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
             if (cursor.moveToFirst()) {
 
+                // Get the indexes of product table columns
                 int nameColumnIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_NAME);
                 int quantityColumnIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_QUANTITY);
                 int priceColumnIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_PRICE);
                 int imageColumnIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_IMAGE);
 
+                // Get the values of each field in database
                 String name = cursor.getString(nameColumnIndex);
                 int quantity = cursor.getInt(quantityColumnIndex);
                 float price = cursor.getFloat(priceColumnIndex);
                 String image = cursor.getString(imageColumnIndex);
 
+                // Set the views with the given data
                 mNameEditText.setText(name);
                 mQuantityEditText.setText(String.format(Locale.getDefault(), "%d", quantity));
                 mPriceEditText.setText(String.format(Locale.getDefault(), "%.2f", price));
@@ -330,7 +337,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     }
 
     /***
-     * Select picture from gallery setting to the current product
+     * Create the intent for selecting picture from gallery
      */
     public void selectPicture(View view) {
         Intent intent;
@@ -347,7 +354,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     }
 
     /***
-     * Take a new picture from camera setting to the current product
+     * Create the intent for taking a new picture from camera
      */
     public void takePicture(View view) {
 
@@ -384,28 +391,31 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     }
 
     /***
-     * Called when Select Picture from Gallery or Take Picture from Camera activity exits,
-     * giving the requestCode you started it with, the resultCode it returned, and additional data
-     * from it.
+     * Called when launched activity exits, giving the requestCode started it with, the resultCode
+     * it returned, and additional data from it.
+     *
+     * If the result code were successful, then set the product image obtained from the gallery or
+     * camera.
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
 
         if (resultCode == Activity.RESULT_OK) {
-            // If request code is Select Picture and result code is success
-            if (requestCode == PICK_IMAGE_REQUEST && resultData == null) {
-                // Set product image with the given data from intent
+
+            if (requestCode == PICK_IMAGE_REQUEST && resultData != null) {
+
                 mImageUri = resultData.getData();
                 mImageView.setImageBitmap(
                         BitmapUtility.getBitmapFromUri(this, mImageUri,
                                 mImageView.getWidth(), mImageView.getHeight()));
-            // If request code is Take Picture and result code is success
+
             } else if (requestCode == REQUEST_IMAGE_CAPTURE) {
-                // Set product image with the output media file
+
                 mImageView.setImageBitmap(
                         BitmapUtility.getBitmapFromUri(this, mImageUri,
                                 mImageView.getWidth(), mImageView.getHeight()));
             }
+
             mProductHasChanged = true;
         }
     }
@@ -418,6 +428,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         // If user is adding a new product or updating a existing one
         if (mProductHasChanged || mCurrentProductUri == null) {
 
+            // Get the values from the input fields
             String name = mNameEditText.getText().toString().trim();
             String quantityString = mQuantityEditText.getText().toString().trim();
             String priceString = mPriceEditText.getText().toString().trim();
@@ -428,10 +439,12 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 image = "";
             }
 
+            // Validate the name
             if (TextUtils.isEmpty(name)) {
                 throw new IllegalArgumentException(getString(R.string.invalid_product_name_exception));
             }
 
+            // Validate the quantity
             int quantity;
             if (TextUtils.isEmpty(quantityString)) {
                 quantity = -1;
@@ -447,6 +460,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 throw new IllegalArgumentException(getString(R.string.invalid_product_quantity_exception));
             }
 
+            // Validate the price
             float price;
             if (TextUtils.isEmpty(priceString)) {
                 price = -1f;
@@ -471,6 +485,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             values.put(ProductEntry.COLUMN_PRODUCT_IMAGE, image);
 
             if (mCurrentProductUri == null) {
+
                 // Insert the new row, returning the primary key value of the new row
                 Uri uri = getContentResolver().insert(ProductEntry.CONTENT_URI, values);
 
@@ -483,7 +498,14 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 }
             } else {
 
-                getContentResolver().update(mCurrentProductUri, values, null, null);
+                // Update the existing row
+                int rowsUpdated = getContentResolver().update(mCurrentProductUri, values, null, null);
+
+                if (rowsUpdated == 0){
+                    Toast.makeText(this, R.string.editor_update_product_failed, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, R.string.editor_update_product_successful, Toast.LENGTH_SHORT).show();
+                }
 
             }
         }
@@ -492,6 +514,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     }
 
+    /***
+     * Initialize the contents of the Activity's standard options menu.
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu options from the res/menu/menu_editor.xml file.
@@ -502,8 +527,10 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         // User clicked on a menu option in the app bar overflow menu
         switch (item.getItemId()) {
+
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
                 try {
@@ -512,14 +539,15 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                     Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
                 return true;
+
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
                 showDeleteConfirmationDialog();
                 return true;
+
             // Respond to a click on the "Up" arrow button in the app bar
             case android.R.id.home:
                 // If the product hasn't changed, continue with navigating up to parent activity
-                // which is the {@link CatalogActivity}.
                 if (!mProductHasChanged) {
                     NavUtils.navigateUpFromSameTask(EditorActivity.this);
                     return true;
@@ -579,6 +607,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
      */
     private void showUnsavedChangesDialog(
             DialogInterface.OnClickListener discardButtonClickListener) {
+
         // Create an AlertDialog.Builder and set the message, and click listeners
         // for the postivie and negative buttons on the dialog.
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -600,18 +629,21 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     }
 
     private void showDeleteConfirmationDialog() {
+
         // Create an AlertDialog.Builder and set the message, and click listeners
         // for the postivie and negative buttons on the dialog.
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(R.string.delete_dialog_msg);
         builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
+
                 // User clicked the "Delete" button, so delete the product.
                 deleteProduct();
             }
         });
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
+
                 // User clicked the "Cancel" button, so dismiss the dialog
                 // and continue editing the product.
                 if (dialog != null) {
@@ -632,6 +664,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         if (mCurrentProductUri != null) {
 
+            // Delete the current product
             int rowsDeleted = getContentResolver().delete(mCurrentProductUri, null, null);
 
             if (rowsDeleted == 0){

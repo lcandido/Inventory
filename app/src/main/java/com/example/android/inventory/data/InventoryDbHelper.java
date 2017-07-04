@@ -5,20 +5,23 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import com.example.android.inventory.data.InventoryContract.ProductEntry;
 
-public class InventoryDbHelper extends SQLiteOpenHelper {
+class InventoryDbHelper extends SQLiteOpenHelper {
 
-    public static final String LOG_TAG = InventoryDbHelper.class.getSimpleName();
-
-    /** Name of the database file */
+    // Name of the database file
     private static final String DATABASE_NAME = "inventory.db";
 
-    /** Database version. If you change the database schema, you must increment the database version. */
+    // Database version. If you change the database schema, you must increment the database version.
     private static final int DATABASE_VERSION = 1;
 
-    public InventoryDbHelper(Context context) {
+    // Inventory database helper constructor
+    InventoryDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+    /***
+     * Called when the database is created for the first time.
+     * @param db    The database
+     */
     @Override
     public void onCreate(SQLiteDatabase db) {
 
@@ -34,6 +37,12 @@ public class InventoryDbHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_PRODUCTS_TABLE);
     }
 
+    /***
+     * Called when the database needs to be upgraded.
+     * @param db            The database
+     * @param oldVersion    The old database version
+     * @param newVersion    The new database version
+     */
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
