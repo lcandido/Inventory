@@ -13,18 +13,34 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.media.ExifInterface;
 import android.net.Uri;
-import android.widget.ImageView;
+import android.os.Build;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
+import static android.R.attr.path;
 
+/***
+ * Bitmap util class
+ */
 public class BitmapUtility {
 
     public static Bitmap getBitmapFromUri(Context context, Uri uri, int viewWidth, int viewHeight) {
+        InputStream in;
+        ExifInterface exif;
+
         if (uri==null) { return null; }
         try {
 
-            ExifInterface exif = new ExifInterface(uri.getPath());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                in = context.getContentResolver().openInputStream(uri);
+                exif = new ExifInterface(in);
+            } else
+            {
+                exif = new ExifInterface(uri.getPath());
+            }
+
             int orientation = exif.getAttributeInt(
                     ExifInterface.TAG_ORIENTATION,
                     ExifInterface.ORIENTATION_NORMAL);
@@ -49,17 +65,17 @@ public class BitmapUtility {
 
             int height = options.outHeight;
             int width = options.outWidth;
-            int inSampleSize = 1;
+            int scaleFactor = 1;
 
             if (height > viewHeight || width > viewWidth) {
                 if (width > height) {
-                    inSampleSize = Math.round((float)height / (float)viewHeight);
+                    scaleFactor = Math.round((float)height / (float)viewHeight);
                 } else {
-                    inSampleSize = Math.round((float)width / (float)viewWidth);
+                    scaleFactor = Math.round((float)width / (float)viewWidth);
                 }
             }
 
-            options.inSampleSize = inSampleSize;
+            options.inSampleSize = scaleFactor;
             options.inJustDecodeBounds = false;
 
             Bitmap bmp = BitmapFactory.decodeStream(

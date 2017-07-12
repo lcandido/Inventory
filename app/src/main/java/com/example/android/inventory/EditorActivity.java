@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
+import android.support.v4.content.FileProvider;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -39,6 +41,7 @@ import com.example.android.inventory.data.InventoryContract.ProductEntry;
 import com.example.android.inventory.util.BitmapUtility;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -251,10 +254,11 @@ public class EditorActivity extends AppCompatActivity
                 mQuantityEditText.setText(String.format(Locale.getDefault(), "%d", quantity));
                 mPriceEditText.setText(String.format(Locale.getDefault(), "%.2f", price));
 
-                if (!image.isEmpty()) {
+                if (!TextUtils.isEmpty(image)) {
                     mImageUri = Uri.parse(image);
-                    mImageView.setImageBitmap(BitmapUtility.getBitmapFromUri(
-                            this, mImageUri, mImageView.getWidth(), mImageView.getHeight()));
+                    Bitmap bmp = BitmapUtility.getBitmapFromUri(
+                            this, mImageUri, mImageView.getWidth(), mImageView.getHeight());
+                    mImageView.setImageBitmap(bmp);
                 }
 
             }
@@ -360,34 +364,40 @@ public class EditorActivity extends AppCompatActivity
 
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-        try {
-            mImageUri = Uri.fromFile(getOutputMediaFile());
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, mImageUri);
-            startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (intent.resolveActivity(getPackageManager()) != null) {
+
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            if (photoFile != null) {
+                mImageUri = FileProvider.getUriForFile(
+                        this,
+                        getApplicationContext().getPackageName() + ".fileprovider",
+                        photoFile);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, mImageUri);
+                intent.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+            }
         }
     }
 
     /***
      * Get an output media file to take picture from camera.
      */
-    private File getOutputMediaFile() {
+    private File createImageFile() throws IOException {
 
-        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DCIM), "Camera");
-
-        if (!mediaStorageDir.exists()){
-            if (!mediaStorageDir.mkdirs()){
-                return null;
-            }
-        }
-
-        String timeStamp = new SimpleDateFormat(
-                "yyyyMMdd_HHmmssSSS", Locale.getDefault()).format(new Date());
-
-        return new File(mediaStorageDir.getPath() + File.separator +
-                JPEG_FILE_PREFIX + timeStamp + JPEG_FILE_SUFFIX);
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmssSSS").format(new Date());
+        String imageFileName = JPEG_FILE_PREFIX + timeStamp;
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        return File.createTempFile(
+                imageFileName,
+                JPEG_FILE_SUFFIX,
+                storageDir
+        );
     }
 
     /***
@@ -406,14 +416,14 @@ public class EditorActivity extends AppCompatActivity
 
                 mImageUri = resultData.getData();
                 mImageView.setImageBitmap(
-                        BitmapUtility.getBitmapFromUri(this, mImageUri,
-                                mImageView.getWidth(), mImageView.getHeight()));
+                        BitmapUtility.getBitmapFromUri(
+                                this, mImageUri, mImageView.getWidth(), mImageView.getHeight()));
 
             } else if (requestCode == REQUEST_IMAGE_CAPTURE) {
 
                 mImageView.setImageBitmap(
-                        BitmapUtility.getBitmapFromUri(this, mImageUri,
-                                mImageView.getWidth(), mImageView.getHeight()));
+                        BitmapUtility.getBitmapFromUri(
+                                this, mImageUri, mImageView.getWidth(), mImageView.getHeight()));
             }
 
             mProductHasChanged = true;
@@ -432,12 +442,7 @@ public class EditorActivity extends AppCompatActivity
             String name = mNameEditText.getText().toString().trim();
             String quantityString = mQuantityEditText.getText().toString().trim();
             String priceString = mPriceEditText.getText().toString().trim();
-            String image;
-            if (mImageUri != null) {
-                image = mImageUri.toString();
-            } else {
-                image = "";
-            }
+            String image = "";
 
             // Validate the name
             if (TextUtils.isEmpty(name)) {
@@ -475,6 +480,10 @@ public class EditorActivity extends AppCompatActivity
 
             if (price < 0) {
                 throw new IllegalArgumentException(getString(R.string.invalid_product_price_exception));
+            }
+
+            if (mImageUri != null) {
+                image = mImageUri.toString();
             }
 
             // Create a new map of values, where column names are the keys

@@ -4,7 +4,9 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -94,11 +96,10 @@ class ProductCursorAdapter extends CursorAdapter {
 
         // Update the ImageView with the product image attribute for the current product
         if (!TextUtils.isEmpty(productImage)) {
+
             Uri uri = Uri.parse(productImage);
-            imageView.setImageBitmap(
-                    BitmapUtility.getCircleBitmap(
-                    BitmapUtility.getBitmapFromUri(context, uri, 40, 40)));
-            imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+            Bitmap bmp = BitmapUtility.getBitmapFromUri(context, uri, 40, 40);
+            imageView.setImageBitmap(BitmapUtility.getCircleBitmap(bmp));
         }
 
         // Update the TextViews with the attributes for the current product
